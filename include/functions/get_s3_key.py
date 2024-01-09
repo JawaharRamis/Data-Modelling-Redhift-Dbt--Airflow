@@ -11,7 +11,8 @@ def get_s3_key(**context):
         msg_body = json.loads(msg_body)
     key =msg_body['Records'][0]['s3']['object']['key']
     delete_sqs_message(message)
-    return key
+    context['ti'].xcom_push(key='s3_key', value=key)
+    return {"key": key}
 
 def delete_sqs_message(delete_sqs_message):
     aws_hook = AwsBaseHook(aws_conn_id="aws_sqs_conn", client_type='sqs')

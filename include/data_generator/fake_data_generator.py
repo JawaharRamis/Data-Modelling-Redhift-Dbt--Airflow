@@ -57,7 +57,7 @@ class FakeDataGenerator:
         return fake_rows
 
     def generate_fake_data(self):
-        num_rows = random.randint(200, 500)  # Random number of rows between 5 and 20
+        num_rows = random.randint(100, 400)  # Random number of rows between 5 and 20
         fake_data = []
         for _ in range(num_rows):
             num_products = random.randint(1, 5)

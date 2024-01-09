@@ -45,6 +45,11 @@ execution_config = ExecutionConfig(
     dbt_executable_path=DBT_EXECUTABLE_PATH,
 )
 
+def read_key(**context):
+    message = context['ti'].xcom_pull(key='key', task_ids='get_s3_key_task')
+    print(message)
+    return message
+
 with DAG(
     DAG_NAME,
     default_args=default_args,
@@ -83,21 +88,27 @@ with DAG(
         provide_context=True
     )
 
+    read_key = PythonOperator(
+        task_id='read_key',
+        python_callable=get_s3_key,
+    )
 
-    # s3_to_redshift_stage = S3ToRedshiftOperator(
-    #     task_id='s3_to_redshift_stage',
-    #     schema='stage',
-    #     table='stage',
-    #     s3_bucket='superstore-kaggle',
-    #     s3_key='{{ ti.xcom_pull(task_ids="poll_sqs_and_get_s3_key") }}',
-    #     redshift_conn_id='redshift_default',
-    #     aws_conn_id='aws_default',
-    #     copy_options=[
-    #         "TIMEFORMAT 'auto'",
-    #         "IGNOREHEADER 1",
-    #         "csv",
-    #         "ACCEPTINVCHARS"
-    #     ]
-    # )
 
-    start_operator>>fake_data_to_s3>>sqs_sensor>>get_s3_key_task
+
+    s3_to_redshift_stage = S3ToRedshiftOperator(
+        task_id='s3_to_redshift_stage',
+        schema='stage',
+        table='stage',
+        s3_bucket='superstore-kaggle',
+        s3_key="{{ti.xcom_pull(key='s3_key',task_ids='get_s3_key')}}",
+        redshift_conn_id='redshift_default',
+        aws_conn_id='aws_default',
+        copy_options=[
+            "TIMEFORMAT 'auto'",
+            "IGNOREHEADER 1",
+            "csv",
+            "ACCEPTINVCHARS"
+        ],
+    )
+
+    start_operator>>fake_data_to_s3>>sqs_sensor>>get_s3_key_task>>s3_to_redshift_stage
