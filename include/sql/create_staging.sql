@@ -1,6 +1,6 @@
-CREATE TABLE IF NOT EXISTS {{ params.schema }}.{{ params.schema }} (
-    "Row ID" VARCHAR(255),
+CREATE TABLE IF NOT EXISTS {{ params.schema }}.{{ params.table }} (
     "Order ID" VARCHAR(255),
+    "Record Date" TIMESTAMP,
     "Order Date" TIMESTAMP,
     "Ship Date" TIMESTAMP,
     "Ship Mode" VARCHAR(255),

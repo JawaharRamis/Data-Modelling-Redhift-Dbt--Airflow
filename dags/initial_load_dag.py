@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from airflow.providers.amazon.aws.transfers.local_to_s3 import LocalFilesystemToS3Operator
 from airflow.providers.amazon.aws.operators.redshift_sql import RedshiftSQLOperator
 from airflow.providers.amazon.aws.transfers.s3_to_redshift import S3ToRedshiftOperator
+from airflow.operators.python import PythonOperator
 from airflow.utils.task_group import TaskGroup
 
 from cosmos import DbtTaskGroup, ProjectConfig, ProfileConfig, ExecutionConfig
@@ -14,6 +15,8 @@ from airflow.decorators import (
 from airflow import DAG
 from airflow.operators.empty import EmptyOperator
 import os
+from include.functions.add_record_date import add_record_date
+
 
 DAG_NAME = 'superstore_data_pipeline'
 
@@ -33,7 +36,7 @@ profile_config = ProfileConfig(
     target_name="dev",
     profile_mapping=RedshiftUserPasswordProfileMapping(
         conn_id="redshift_default",
-        profile_args={"schema": "stage"},
+        profile_args={"schema": "public"},
     ),
 )
 
@@ -55,11 +58,18 @@ with DAG(
         dag=dag,
     )
 
+    add_column_task = PythonOperator(
+        task_id='add_column',
+        python_callable=add_record_date,
+        op_args=['/usr/local/airflow/include/data/raw_Superstore.csv', '/usr/local/airflow/include/data/Superstore.csv'],
+        dag=dag,
+    )
+
     create_local_to_s3_job = LocalFilesystemToS3Operator(
         task_id="create_local_to_s3_job",
-        filename='/data/Superstore.csv',
-        dest_key="superstore",
-        dest_bucket="superstore-kaggle",
+        filename='/usr/local/airflow/include/data/Superstore.csv',
+        dest_bucket=os.environ.get("S3_BUCKET"),
+        dest_key=os.environ.get("S3_INITIAL_LOAD_KEY"),
         replace=True,
         aws_conn_id= "aws_default"
     )
@@ -94,7 +104,7 @@ with DAG(
         sql='/sql/create_staging.sql',
         params={
             "schema": "stage",
-            "table": "sales_records"
+            "table": "staging"
         },
     )
 
@@ -102,8 +112,8 @@ with DAG(
         task_id='s3_to_redshift_stage',
         schema='stage',
         table='stage',
-        s3_bucket='superstore-kaggle',
-        s3_key='superstore',
+        s3_bucket=os.environ.get("S3_BUCKET"),
+        s3_key=os.environ.get("S3_INITIAL_LOAD_KEY"),
         redshift_conn_id='redshift_default',
         aws_conn_id='aws_default',
         copy_options=[
@@ -122,14 +132,14 @@ with DAG(
         default_args={"retries": 2},
     )
 
-        # delete_staging_table = RedshiftSQLOperator(
-    #     task_id='delete_staging_table',
-    #     sql='/sql/delete_staging.sql',
-    #     params={
-    #         "schema": "public",
-    #         "table": "sample"
-    #     },
-    # )
+    delete_staging_table = RedshiftSQLOperator(
+        task_id='delete_staging_table',
+        sql='/sql/delete_staging.sql',
+        params={
+            "schema": "public",
+            "table": "sample"
+        },
+    )
 
 
-    start_operator>>create_local_to_s3_job>>create_schema_task_group>>create_staging_table>>s3_to_redshift_stage>>transform_data
+    start_operator>>add_column_task>>create_local_to_s3_job>>create_schema_task_group>>create_staging_table>>s3_to_redshift_stage>>transform_data

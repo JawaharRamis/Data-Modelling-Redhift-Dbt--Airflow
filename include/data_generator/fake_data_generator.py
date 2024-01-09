@@ -1,4 +1,4 @@
-from include.data.data_generator.fake_data_generator import Faker
+from faker import Faker
 import random
 from datetime import datetime, timedelta
 
@@ -12,11 +12,14 @@ class FakeDataGenerator:
     def generate_fake_row(self, num_products):
         customer_row = random.choice(self.existing_data)
 
-        order_id = self.fake.uuid4()
+        # order_id = self.fake.uuid4()
+        name_initials = ''.join([x[0].upper() for x in customer_row["Customer Name"].split(' ')]) + "-"
+        order_id_suffix = "".join([str(random.randint(0, 9)) for _ in range(5)])
+        order_id = name_initials + order_id_suffix
         order_date = self.fake.date_between_dates(datetime(2022, 1, 1), datetime.now())
         ship_date = order_date + timedelta(days=random.randint(1, 10))
         ship_mode = self.fake.random_element(["Standard", "Express"])
-
+        record_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         fake_rows = []
         for _ in range(num_products):
             product_row = random.choice(self.existing_data)
@@ -28,6 +31,7 @@ class FakeDataGenerator:
             fake_row = {
                 "Row ID": self.fake.uuid4(),
                 "Order ID": order_id,
+                "Record Date": record_date,
                 "Order Date": order_date,
                 "Ship Date": ship_date,
                 "Ship Mode": ship_mode,
@@ -58,7 +62,7 @@ class FakeDataGenerator:
         for _ in range(num_rows):
             num_products = random.randint(1, 5)
             fake_row = self.generate_fake_row(num_products)
-            fake_data.append(fake_row)
+            fake_data.extend(fake_row)
 
         return fake_data
 

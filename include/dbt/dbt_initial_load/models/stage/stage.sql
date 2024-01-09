@@ -1,5 +1,5 @@
 {{ config(
-    materialized="table",
+    materialized="ephemeral",
 ) }}
 
 SELECT * FROM stage.stage

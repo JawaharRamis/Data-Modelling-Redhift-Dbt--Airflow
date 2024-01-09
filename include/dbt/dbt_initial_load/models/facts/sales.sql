@@ -1,9 +1,9 @@
 {{ config(
-    materialized="table",
+    materialized="table"
 ) }}
 
 WITH sales AS (
-    SELECT "Row ID", "Order ID", "Customer ID", "Product ID", "Sales", "Quantity", "Discount", "Profit"
+    SELECT "Order ID", "Record Date", "Customer ID", "Product ID", "Sales", "Quantity", "Discount", "Profit"
     FROM {{ ref('stage') }}
 )
 

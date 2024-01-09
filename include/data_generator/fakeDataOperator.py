@@ -1,12 +1,12 @@
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
-from airflow.hooks.base import BaseHook
-import boto3
-from tempfile import NamedTemporaryFile
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
+import os
 import csv
 import json
-from fake_data_generator import FakeDataGenerator
-from airflow.providers.amazon.aws.hooks.s3 import S3Hook
+import datetime
+import pandas as pd
+from include.data_generator.fake_data_generator import FakeDataGenerator
 
 
 class FakeDataToS3Operator(BaseOperator):
@@ -20,18 +20,13 @@ class FakeDataToS3Operator(BaseOperator):
             s3_bucket,
             s3_key,
             existing_data_key,
-            num_rows=10,
-            min_products=1,
-            max_products=5,
             *args, **kwargs):
         super(FakeDataToS3Operator, self).__init__(*args, **kwargs)
         self.aws_conn_id = aws_conn_id
         self.s3_bucket = s3_bucket
         self.s3_key = s3_key
         self.existing_data_key = existing_data_key
-        self.num_rows = num_rows
-        self.min_products = min_products
-        self.max_products = max_products
+
 
     def execute(self, context):
         # aws_hook = BaseHook.get_connection(self.aws_conn_id)
@@ -41,23 +36,25 @@ class FakeDataToS3Operator(BaseOperator):
         # Generate fake data
         fake_data_generator = FakeDataGenerator(existing_data)
         fake_data = fake_data_generator.generate_fake_data()
+        for row in fake_data[:3]:
+            print(row)
+        # data_str = json.dumps(fake_data, cls=DateEncoder)
 
-        data_str = json.dumps(fake_data)
+        df = pd.DataFrame(fake_data)
+        csv_file = '/usr/local/airflow/include/data/fake_data.csv'
+        df.to_csv(csv_file, index=False)
 
-        s3_hook.write_key(key=self.s3_key, bucket_name=self.s3_bucket, data=data_str)
+        # Upload the CSV file to S3
+        s3_hook.load_file(
+            filename=csv_file,
+            key=self.s3_key,
+            bucket_name=self.s3_bucket,
+            replace=True
+        )
 
-        # Write fake data to a temporary CSV file
-        # with NamedTemporaryFile(mode='w+', newline='', delete=False) as temp_csv:
-        #     csv_writer = csv.DictWriter(temp_csv, fieldnames=fake_data[0].keys())
-        #     csv_writer.writeheader()
-        #     csv_writer.writerows(fake_data)
-        # Upload the temporary CSV file to S3
-        # s3_hook.upload_file(temp_csv.name, self.s3_bucket, self.s3_key)
+        # Remove the temporary file
+        # os.remove(csv_file)
 
-        # Clean up the temporary file
-        # temp_csv.close()
-
-        # self.log.info(f"Fake data successfully uploaded to s3://{self.s3_bucket}/{self.s3_key}")
 
     def load_existing_data(self, s3_hook):
         existing_data = []
@@ -68,3 +65,9 @@ class FakeDataToS3Operator(BaseOperator):
             existing_data = [row for row in reader]
 
         return existing_data
+    
+class DateEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime.date):
+            return obj.isoformat()
+        return json.JSONEncoder.default(self, obj)
