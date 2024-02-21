@@ -18,7 +18,7 @@ import os
 from include.functions.add_record_date import add_record_date
 
 
-DAG_NAME = 'superstore_data_pipeline'
+DAG_NAME = 'initial_load_superstore_data'
 
 DBT_EXECUTABLE_PATH = f"{os.environ['AIRFLOW_HOME']}/dbt_venv/bin/dbt"
 
@@ -70,6 +70,8 @@ with DAG(
         filename='/usr/local/airflow/include/data/Superstore.csv',
         dest_bucket=os.environ.get("S3_BUCKET"),
         dest_key=os.environ.get("S3_INITIAL_LOAD_KEY"),
+        # dest_bucket="superstore-kaggle",
+        # dest_key="superstore",
         replace=True,
         aws_conn_id= "aws_default"
     )
@@ -87,15 +89,7 @@ with DAG(
             task_id='create_dimensions_schema',
             sql='/sql/create_schema.sql',
             params={
-                "schema": "dimensions",
-            },
-        )
-
-        create_facts_schema = RedshiftSQLOperator(
-            task_id='create_facts_schema',
-            sql='/sql/create_schema.sql',
-            params={
-                "schema": "facts",
+                "schema": "public",
             },
         )
 
@@ -111,7 +105,7 @@ with DAG(
     s3_to_redshift_stage = S3ToRedshiftOperator(
         task_id='s3_to_redshift_stage',
         schema='stage',
-        table='stage',
+        table='staging',
         s3_bucket=os.environ.get("S3_BUCKET"),
         s3_key=os.environ.get("S3_INITIAL_LOAD_KEY"),
         redshift_conn_id='redshift_default',
@@ -134,12 +128,14 @@ with DAG(
 
     delete_staging_table = RedshiftSQLOperator(
         task_id='delete_staging_table',
-        sql='/sql/delete_staging.sql',
+        sql='/sql/delete_schema.sql',
         params={
-            "schema": "public",
-            "table": "sample"
+            "schema": "stage",
+            "table": "staging"
         },
     )
 
 
     start_operator>>add_column_task>>create_local_to_s3_job>>create_schema_task_group>>create_staging_table>>s3_to_redshift_stage>>transform_data
+
+    transform_data>>delete_staging_table

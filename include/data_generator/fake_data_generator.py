@@ -11,8 +11,11 @@ class FakeDataGenerator:
 
     def generate_fake_row(self, num_products):
         customer_row = random.choice(self.existing_data)
+        self.existing_data.sort(key=lambda x: x['Order Date'], reverse=True)
 
-        # order_id = self.fake.uuid4()
+        print(f"inside generate_fake_row : {len(self.existing_data)}")
+
+
         name_initials = ''.join([x[0].upper() for x in customer_row["Customer Name"].split(' ')]) + "-"
         order_id_suffix = "".join([str(random.randint(0, 9)) for _ in range(5)])
         order_id = name_initials + order_id_suffix
@@ -29,7 +32,6 @@ class FakeDataGenerator:
             profit = round(random.uniform(-20, 20), 2)
 
             fake_row = {
-                "Row ID": self.fake.uuid4(),
                 "Order ID": order_id,
                 "Record Date": record_date,
                 "Order Date": order_date,

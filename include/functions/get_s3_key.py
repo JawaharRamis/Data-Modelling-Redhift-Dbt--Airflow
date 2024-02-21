@@ -10,7 +10,7 @@ def get_s3_key(**context):
     if isinstance(msg_body, str):
         msg_body = json.loads(msg_body)
     key =msg_body['Records'][0]['s3']['object']['key']
-    delete_sqs_message(message)
+    # delete_sqs_message(message)
     context['ti'].xcom_push(key='s3_key', value=key)
     return {"key": key}
 
@@ -27,6 +27,5 @@ def delete_sqs_message(delete_sqs_message):
         aws_session_token=credentials.token
     )
 
-    # url= "https://sqs.us-east-1.amazonaws.com/521965996346/superstore_s3_queue"
     url = os.environ.get("SQS_URL")
     sqs.delete_message(QueueUrl=url, ReceiptHandle=delete_sqs_message[0]['ReceiptHandle'])
