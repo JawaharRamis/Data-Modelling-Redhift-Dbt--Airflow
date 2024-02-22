@@ -59,3 +59,9 @@ The Incremental Load DAG is responsible for incremental data load using the data
 
 ![Incremental load dag](images/incremental.png)
 
+## How can I make this better?
+
+- Implement CI/CD
+- Utilizing Infrastructure as code
+- Dashboard and Analysis
+- Managaed Infra for Airflow
