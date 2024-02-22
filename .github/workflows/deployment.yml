@@ -33,4 +33,4 @@ jobs:
     - name: Deploy to Astro
       uses: astronomer/deploy-action@v0.2
     if: success() && github.event_name == 'pull_request'
-    run: echo "Pull request succesfull. Merged with main branch"
+      run: echo "Pull request succesfull. Merged with main branch"
