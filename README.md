@@ -23,12 +23,21 @@ The data modeling follows a typical star schema approach, with facts and dimensi
 
 The Initial Load DAG is responsible for the initial data load from a Kaggle dataset into Redshift. It comprises the following tasks:
 
-1. **Add Column Task**: A PythonOperator task (`add_column_task`) to add a record date column to the dataset.
-2. **Local to S3 Task**: A LocalFilesystemToS3Operator task (`create_local_to_s3_job`) to upload the dataset to an S3 bucket.
-3. **Create Schema Task Group**: A TaskGroup (`create_schema_task_group`) containing two RedshiftSQLOperator tasks to create schemas for staging and public dimensions.
-4. **Create Staging Table Task**: A RedshiftSQLOperator task (`create_staging_table`) to create a staging table in Redshift.
-5. **S3 to Redshift Stage Task**: An S3ToRedshiftOperator task (`s3_to_redshift_stage`) to copy data from S3 to the Redshift staging table.
-6. **Transform Data Task Group**: A DbtTaskGroup (`transform_data`) to execute dbt transformations on the staged data.
-7. **Delete Staging Table Task**: A RedshiftSQLOperator task (`delete_staging_table`) to clean up the staging table after data transformation.
+1. Loading the local file onto the s3 bucket
+2. Creating schema for staging and public in redhsift
+3. Load the data from s3 to redhsift staging
+4. Perform transformations in staging using dbt and load to public. dbt models mateiralized as tables to create new tables.
+5. Delete staging schema
 
+### Incremental Load DAG
+
+The Incremental Load DAG is responsible for incremental data load using the data logically generated using Faker library.
+
+1. Generates fake data and pushes it to an S3 bucket
+2. Waits for a message in the SQS queue and retrieves the S3 key from the SQS message of the latest file uploaded in the bucket
+3. Create staging schema
+4. Load the data from s3 to redhsift staging
+5. staged data undergoes incremental transformations using dbt.
+6. Delete staging schema
+7. Data quality checks are performed using SODA to ensure the integrity and accuracy of the loaded data.
 
