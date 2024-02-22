@@ -14,10 +14,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
-
 
 env:
   ASTRO_API_TOKEN: ${{ inputs.apiToken || secrets.ASTRO_API_TOKEN }}
