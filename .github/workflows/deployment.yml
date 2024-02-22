@@ -20,10 +20,9 @@ env:
   DEPLOYMENT_ID: ${{ inputs.deploymentId || vars.DEPLOYMENT_ID }}
 
 jobs:
+  environment: test
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Check
-      run : echo "running deployment"
     - name: Deploy to Astro
       uses: astronomer/deploy-action@v0.2
