@@ -14,6 +14,10 @@ on:
   push:
     branches:
       - main
+      - 'releases/**'
+    paths-ignore:
+      - '**.md'
+      - 'images/*'
 
 env:
   ASTRO_API_TOKEN: ${{ inputs.apiToken || secrets.ASTRO_API_TOKEN }}
@@ -24,5 +28,9 @@ jobs:
     environment: test
     runs-on: ubuntu-latest
     steps:
+    - name: Check out code
+        uses: actions/checkout@v2
     - name: Deploy to Astro
       uses: astronomer/deploy-action@v0.2
+    if: success() && github.event_name == 'pull_request'
+    run: echo "Pull request succesfull. Merged with main branch"
