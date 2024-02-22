@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out code
-        uses: actions/checkout@v2
+      uses: actions/checkout@v2
     - name: Deploy to Astro
       uses: astronomer/deploy-action@v0.2
     if: success() && github.event_name == 'pull_request'
