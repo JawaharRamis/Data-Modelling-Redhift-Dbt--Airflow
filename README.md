@@ -3,8 +3,6 @@
 This project showcases an Airflow-based data pipeline designed for loading and processing data from a table into a Redshift data warehouse. The pipeline consists of two DAGs: one for the initial load and another for incremental load.
 
 ## Project Overview
-===================
-
 The project involves the following components and technologies:
 
 - Airflow for workflow orchestration (using astro)
@@ -16,6 +14,18 @@ The project involves the following components and technologies:
 - Faker library for incremental load data generation
 
 The data modeling follows a typical star schema approach, with facts and dimensions.
+
+## Tools and Technologies
+
+- Cloud - AWS
+- Containerization - Docker
+- Orchestration - Airflow
+- Transformation - dbt
+- Data Lake - S3
+- Data Warehouse - Redshift
+- Data Quality - Soda
+- Queue Service - SQS
+- Language - Python, SQL
 
 ## Architecture
 
