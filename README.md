@@ -59,6 +59,21 @@ The Incremental Load DAG is responsible for incremental data load using the data
 
 ![Incremental load dag](images/incremental.png)
 
+## Getting Started
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/JawaharRamis/Data-Modelling-Redshift-Dbt--Airflow.git
+   ```
+
+2. Navigate to the project directory:
+
+   ```bash
+   cd Data-Modelling-Redshift-Dbt--Airflow
+   ```
+
+
 ## How can I make this better?
 
 - Implement CI/CD
