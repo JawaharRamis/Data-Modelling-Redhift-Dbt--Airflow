@@ -72,6 +72,27 @@ The Incremental Load DAG is responsible for incremental data load using the data
    ```bash
    cd Data-Modelling-Redshift-Dbt--Airflow
    ```
+3. Create a `.env` file with following environment variables.
+   - AWS_ACCESS_KEY
+   - AWS_SECRET_KEY
+   - SQS_URL - Url of the SQS queue
+   - S3_BUCKET - S3 bucket name
+   - S3_INITIAL_LOAD_KEY - Initial load key name
+   - DATABASE_USERNAME - redshift username
+   - DATABASE_PASSWORD - redshift username
+   - REDSHIFT_HOST - redshift host address
+  
+4. Create S3 bucket with name S3_BUCKET.
+
+5.  Trigger SQS Queue on S3 file upload
+
+6. Configure Redshift(serverless in my instance) and allow access.
+
+7. Run the astro project
+   ```bash
+   astro dev start
+   ```
+8. Access airflow UI
 
 
 ## How can I make this better?
