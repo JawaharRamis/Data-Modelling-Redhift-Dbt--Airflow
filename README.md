@@ -94,7 +94,10 @@ The Incremental Load DAG is responsible for incremental data load using the data
    ```
 8. Access airflow UI
 
+9. Trigger initial load dag once and switch off  once done
 
+10. Trigger incremental load dag
+    
 ## How can I make this better?
 
 - Implement CI/CD
