@@ -28,6 +28,8 @@ The Initial Load DAG is responsible for the initial data load from a Kaggle data
 3. Load the data from s3 to redhsift staging
 4. Perform transformations in staging using dbt and load to public. dbt models mateiralized as tables to create new tables.
 5. Delete staging schema
+   
+![Initial load dag](images/initial-load-dag.png)
 
 ### Incremental Load DAG
 
@@ -40,4 +42,6 @@ The Incremental Load DAG is responsible for incremental data load using the data
 5. staged data undergoes incremental transformations using dbt.
 6. Delete staging schema
 7. Data quality checks are performed using SODA to ensure the integrity and accuracy of the loaded data.
+
+![Incremental load dag](images/incremental-load-dag.png)
 
