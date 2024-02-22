@@ -25,6 +25,7 @@ The data modeling follows a typical star schema approach, with facts and dimensi
 - Data Warehouse - Redshift
 - Data Quality - Soda
 - Queue Service - SQS
+- CI/CD - Github Actions
 - Language - Python, SQL
 
 ## Architecture
