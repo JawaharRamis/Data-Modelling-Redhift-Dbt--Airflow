@@ -1,0 +1,31 @@
+checks for sales:
+  - row_count > 0
+  - missing_count("Order ID") = 0:
+      name: Order ID should not be nul
+  - avg("Quantity") between 1 and 50:
+      name: Quantity logical range
+  - min("Quantity") > 0:
+      name: Quantity needs to be atleast 1
+  - min("Discount") >= 0:
+      name: Quantity needs to be non negative
+  - min("Sales") > 0:
+      name: Sales needs to be atleast 1
+  - values in "Order ID" must exist in orders "Order ID":
+      name: Referential integrity of Order ID
+  - values in "Product ID" must exist in products "Product ID":
+      name: Referential integrity of Product ID
+  - values in "Customer ID" must exist in customers "Customer ID":
+      name: Referential integrity of Customer ID
+  - duplicate_row_count = 0:
+      name: Primary key check for sales
+      duplicate_row_count query: |
+        SELECT COUNT(*) 
+        FROM (
+          SELECT "Order ID", "Product ID"
+          FROM sales
+          GROUP BY "Order ID", "Product ID"
+          HAVING COUNT(*) > 1
+        )
+  
+
+

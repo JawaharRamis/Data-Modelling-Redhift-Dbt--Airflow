@@ -1,49 +1,106 @@
-Overview
-========
+# Data Modeling with Airflow Data Pipeline Project
 
-Welcome to Astronomer! This project was generated after you ran 'astro dev init' using the Astronomer CLI. This readme describes the contents of the project, as well as how to run Apache Airflow on your local machine.
+This project showcases an Airflow-based data pipeline designed for loading and processing data from a table into a Redshift data warehouse. The pipeline consists of two DAGs: one for the initial load and another for incremental load.
 
-Project Contents
-================
+## Project Overview
+The project involves the following components and technologies:
 
-Your Astro project contains the following files and folders:
+- Airflow for workflow orchestration (using astro)
+- Kaggle dataset for initial load
+- Redshift as the data warehouse
+- Amazon S3 as the staging area
+- dbt (data build tool) for data transformation
+- Soda for data quality monitoring
+- Faker library for incremental load data generation
 
-- dags: This folder contains the Python files for your Airflow DAGs. By default, this directory includes two example DAGs:
-    - `example_dag_basic`: This DAG shows a simple ETL data pipeline example with three TaskFlow API tasks that run daily.
-    - `example_dag_advanced`: This advanced DAG showcases a variety of Airflow features like branching, Jinja templates, task groups and several Airflow operators.
-- Dockerfile: This file contains a versioned Astro Runtime Docker image that provides a differentiated Airflow experience. If you want to execute other commands or overrides at runtime, specify them here.
-- include: This folder contains any additional files that you want to include as part of your project. It is empty by default.
-- packages.txt: Install OS-level packages needed for your project by adding them to this file. It is empty by default.
-- requirements.txt: Install Python packages needed for your project by adding them to this file. It is empty by default.
-- plugins: Add custom or community plugins for your project to this file. It is empty by default.
-- airflow_settings.yaml: Use this local-only file to specify Airflow Connections, Variables, and Pools instead of entering them in the Airflow UI as you develop DAGs in this project.
+The data modeling follows a typical star schema approach, with facts and dimensions.
 
-Deploy Your Project Locally
-===========================
+## Tools and Technologies
 
-1. Start Airflow on your local machine by running 'astro dev start'.
+- Cloud - AWS
+- Containerization - Docker
+- Orchestration - Airflow
+- Transformation - dbt
+- Data Lake - S3
+- Data Warehouse - Redshift
+- Data Quality - Soda
+- Queue Service - SQS
+- Language - Python, SQL
 
-This command will spin up 4 Docker containers on your machine, each for a different Airflow component:
+## Architecture
 
-- Postgres: Airflow's Metadata Database
-- Webserver: The Airflow component responsible for rendering the Airflow UI
-- Scheduler: The Airflow component responsible for monitoring and triggering tasks
-- Triggerer: The Airflow component responsible for triggering deferred tasks
+![Architecture](images/architecture.png)
 
-2. Verify that all 4 Docker containers were created by running 'docker ps'.
+## DAGs
 
-Note: Running 'astro dev start' will start your project with the Airflow Webserver exposed at port 8080 and Postgres exposed at port 5432. If you already have either of those ports allocated, you can either [stop your existing Docker containers or change the port](https://docs.astronomer.io/astro/test-and-troubleshoot-locally#ports-are-not-available).
+### Initial Load DAG
 
-3. Access the Airflow UI for your local Airflow project. To do so, go to http://localhost:8080/ and log in with 'admin' for both your Username and Password.
+The Initial Load DAG is responsible for the initial data load from a Kaggle dataset into Redshift. It comprises the following tasks:
 
-You should also be able to access your Postgres Database at 'localhost:5432/postgres'.
+1. Loading the local file onto the s3 bucket
+2. Creating schema for staging and public in redhsift
+3. Load the data from s3 to redhsift staging
+4. Perform transformations in staging using dbt and load to public. dbt models mateiralized as tables to create new tables.
+5. Delete staging schema
+   
+![Initial load dag](images/initial.png)
 
-Deploy Your Project to Astronomer
-=================================
+### Incremental Load DAG
 
-If you have an Astronomer account, pushing code to a Deployment on Astronomer is simple. For deploying instructions, refer to Astronomer documentation: https://docs.astronomer.io/cloud/deploy-code/
+The Incremental Load DAG is responsible for incremental data load using the data logically generated using Faker library.
 
-Contact
-=======
+1. Generates fake data and pushes it to an S3 bucket
+2. Waits for a message in the SQS queue and retrieves the S3 key from the SQS message of the latest file uploaded in the bucket
+3. Create staging schema
+4. Load the data from s3 to redhsift staging
+5. staged data undergoes incremental transformations using dbt.
+6. Delete staging schema
+7. Data quality checks are performed using SODA to ensure the integrity and accuracy of the loaded data.
 
-The Astronomer CLI is maintained with love by the Astronomer team. To report a bug or suggest a change, reach out to our support.
+![Incremental load dag](images/incremental.png)
+
+## Getting Started
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/JawaharRamis/Data-Modelling-Redshift-Dbt--Airflow.git
+   ```
+
+2. Navigate to the project directory:
+
+   ```bash
+   cd Data-Modelling-Redshift-Dbt--Airflow
+   ```
+3. Create a `.env` file with following environment variables.
+   - AWS_ACCESS_KEY
+   - AWS_SECRET_KEY
+   - SQS_URL - Url of the SQS queue
+   - S3_BUCKET - S3 bucket name
+   - S3_INITIAL_LOAD_KEY - Initial load key name
+   - DATABASE_USERNAME - redshift username
+   - DATABASE_PASSWORD - redshift username
+   - REDSHIFT_HOST - redshift host address
+  
+4. Create S3 bucket with name S3_BUCKET.
+
+5.  Trigger SQS Queue on S3 file upload
+
+6. Configure Redshift(serverless in my instance) and allow access.
+
+7. Run the astro project
+   ```bash
+   astro dev start
+   ```
+8. Access airflow UI
+
+9. Trigger initial load dag once and switch off  once done
+
+10. Trigger incremental load dag
+    
+## How can I make this better?
+
+- Implement CI/CD
+- Utilizing Infrastructure as code
+- Dashboard and Analysis
+- Managaed Infra for Airflow

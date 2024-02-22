@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS {{ params.schema }}.{{ params.table }} (
+    "Order ID" VARCHAR(255),
+    "Record Date" TIMESTAMP,
+    "Order Date" TIMESTAMP,
+    "Ship Date" TIMESTAMP,
+    "Ship Mode" VARCHAR(255),
+    "Customer ID" VARCHAR(255),
+    "Customer Name" VARCHAR(255),
+    "Segment" VARCHAR(255),
+    "Country" VARCHAR(255),
+    "City" VARCHAR(255),
+    "State" VARCHAR(255),
+    "Postal Code" VARCHAR(10),
+    "Region" VARCHAR(255),
+    "Product ID" VARCHAR(255),
+    "Category" VARCHAR(255),
+    "Sub-Category" VARCHAR(255),
+    "Product Name" VARCHAR(255),
+    "Sales" DECIMAL(10, 2),
+    "Quantity" INT,
+    "Discount" DECIMAL(5, 2),
+    "Profit" DECIMAL(10, 2)
+);

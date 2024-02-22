@@ -1,0 +1,30 @@
+[0m20:33:28.818257 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000017E40723D30>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000017E433E4DC0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000017E433E4C40>]}
+
+
+============================== 20:33:28.826259 | c0be3ce2-f467-41da-a518-b321d51cf305 ==============================
+[0m20:33:28.826259 [info ] [MainThread]: Running with dbt=1.7.4
+[0m20:33:28.827275 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'version_check': 'True', 'debug': 'False', 'log_path': 'logs', 'fail_fast': 'False', 'profiles_dir': 'C:\\Users\\aksha\\.dbt', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'invocation_command': 'dbt init', 'log_format': 'default', 'static_parser': 'True', 'target_path': 'None', 'introspect': 'True', 'send_anonymous_usage_stats': 'True'}
+[0m20:33:28.828272 [warn ] [MainThread]: [ConfigFolderDirectory]: Unable to parse dict {'dir': WindowsPath('C:/Users/aksha/.dbt')}
+[0m20:33:28.829258 [info ] [MainThread]: Creating dbt configuration folder at 
+[0m20:33:54.772777 [debug] [MainThread]: Starter project path: c:\users\aksha\onedrive\desktop\thappu\airflow-redshift-dbt\venv\lib\site-packages\dbt\include\starter_project
+[0m20:33:54.867839 [info ] [MainThread]: 
+Your new dbt project "dbt_initial_load" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m20:33:54.870821 [info ] [MainThread]: Setting up your profile.
+[0m20:34:41.760138 [info ] [MainThread]: Profile dbt_initial_load written to C:\Users\aksha\.dbt\profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
+[0m20:34:41.765153 [debug] [MainThread]: Command `dbt init` succeeded at 20:34:41.763145 after 72.97 seconds
+[0m20:34:41.767016 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000017E40723D30>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000017E433E4E20>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000017E43A4E6D0>]}
+[0m20:34:41.768013 [debug] [MainThread]: Flushing usage events
