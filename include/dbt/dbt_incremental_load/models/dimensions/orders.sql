@@ -1,6 +1,7 @@
 {{ config(
-    materialized="incremental"
-)}}
+    materialized='incremental',
+    ) 
+}}
 
 with orders as (
     select distinct "Order ID", "Record Date", "Order Date", "Ship Date", "Ship Mode" from {{ ref('stage') }}
@@ -8,5 +9,5 @@ with orders as (
 
 select * from orders
 {% if is_incremental() %}
-WHERE "Record Date" > (SELECT MAX("Record Date") FROM {{ this }})
+WHERE "Record Date" >= (SELECT MAX("Record Date") FROM {{ this }})
 {% endif %}

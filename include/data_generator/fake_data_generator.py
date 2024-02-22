@@ -2,20 +2,15 @@ from faker import Faker
 import random
 from datetime import datetime, timedelta
 
-import csv
-
 class FakeDataGenerator:
     def __init__(self, existing_data):
         self.fake = Faker()
         self.existing_data = existing_data
 
-    def generate_fake_row(self, num_products):
-        customer_row = random.choice(self.existing_data)
-        self.existing_data.sort(key=lambda x: x['Order Date'], reverse=True)
-
-        print(f"inside generate_fake_row : {len(self.existing_data)}")
-
-
+    def generate_fake_row(self, num_products, valid_customers):
+        # customer_row = random.choice(self.existing_data)
+        customer_row = random.choice(valid_customers)
+        
         name_initials = ''.join([x[0].upper() for x in customer_row["Customer Name"].split(' ')]) + "-"
         order_id_suffix = "".join([str(random.randint(0, 9)) for _ in range(5)])
         order_id = name_initials + order_id_suffix
@@ -24,8 +19,13 @@ class FakeDataGenerator:
         ship_mode = self.fake.random_element(["Standard", "Express"])
         record_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         fake_rows = []
+        used_product_ids = []
         for _ in range(num_products):
-            product_row = random.choice(self.existing_data)
+            available_product_ids = [row['Product ID'] for row in self.existing_data if row['Product ID'] not in used_product_ids]
+            product_id = random.choice(available_product_ids)
+            used_product_ids.append(product_id)
+            product_row = next(row for row in self.existing_data if row['Product ID'] == product_id)
+
             sales = round(random.uniform(200, 500), 2)
             quantity = random.randint(1, 10)
             discount = round(random.uniform(0, 0.2), 2)
@@ -43,8 +43,8 @@ class FakeDataGenerator:
                 "Country": customer_row["Country"],
                 "City": customer_row["City"],
                 "State": customer_row["State"],
-                "Postal Code": self.fake.postcode(),
-                "Region": self.fake.random_element(["North", "South", "East", "West"]),
+                "Postal Code": customer_row["Postal Code"],
+                "Region": customer_row["Region"],
                 "Product ID": product_row["Product ID"],
                 "Category": product_row["Category"],
                 "Sub-Category": product_row["Sub-Category"],
@@ -59,12 +59,30 @@ class FakeDataGenerator:
         return fake_rows
 
     def generate_fake_data(self):
-        num_rows = random.randint(100, 400)  # Random number of rows between 5 and 20
+        num_rows = random.randint(100, 400) 
+        print(f"Number of orders: {num_rows}")
         fake_data = []
+        valid_customers= self.generate_valid_customers()
         for _ in range(num_rows):
             num_products = random.randint(1, 5)
-            fake_row = self.generate_fake_row(num_products)
+            fake_row = self.generate_fake_row(num_products, valid_customers)
             fake_data.extend(fake_row)
-
+        print(f"Number of sales records: {len(fake_data)}")
         return fake_data
+    
+    def generate_valid_customers(self):
+        latest_records = {}
+        valid_records=[]
+        for row in self.existing_data:
+            customer_id = row['Customer ID']
+            order_date = row['Order Date']
+            
+            if customer_id in latest_records:
+                if order_date > latest_records[customer_id]['Order Date']:
+                    latest_records[customer_id] = row
+                    valid_records.append(row)
+            else:
+                latest_records[customer_id] = row
+                valid_records.append(row)
+        return valid_records
 

@@ -70,8 +70,6 @@ with DAG(
         filename='/usr/local/airflow/include/data/Superstore.csv',
         dest_bucket=os.environ.get("S3_BUCKET"),
         dest_key=os.environ.get("S3_INITIAL_LOAD_KEY"),
-        # dest_bucket="superstore-kaggle",
-        # dest_key="superstore",
         replace=True,
         aws_conn_id= "aws_default"
     )
@@ -136,6 +134,4 @@ with DAG(
     )
 
 
-    start_operator>>add_column_task>>create_local_to_s3_job>>create_schema_task_group>>create_staging_table>>s3_to_redshift_stage>>transform_data
-
-    transform_data>>delete_staging_table
+    start_operator>>add_column_task>>create_local_to_s3_job>>create_schema_task_group>>create_staging_table>>s3_to_redshift_stage>>transform_data>>delete_staging_table

@@ -1,0 +1,17 @@
+# data_source superstore:
+#   type: redshift
+#   host: test-workgroup.521965996346.us-east-1.redshift-serverless.amazonaws.com
+#   port: 5439
+#   username: airflow_user_1
+#   password: Airflow_user_1
+#   database: superstore_db
+#   schema: public
+
+data_source superstore:
+  type: redshift
+  host: ${REDSHIFT_HOST}
+  port: 5439
+  username: ${DATABASE_USERNAME}
+  password: ${DATABASE_PASSWORD}
+  database: superstore_db
+  schema: public

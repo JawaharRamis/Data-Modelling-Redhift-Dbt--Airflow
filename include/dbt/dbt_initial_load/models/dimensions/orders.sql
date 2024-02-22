@@ -1,9 +1,11 @@
 {{ config(
-    materialized="table"
+    materialized="table",
+    unique_key="Order ID"
 )}}
 
 with orders as (
-    select distinct "Order ID", "Order Date", "Ship Date", "Ship Mode" from {{ ref('stage') }}
+    select DISTINCT "Order ID","Record Date","Order Date", "Ship Date", "Ship Mode"
+    from {{ ref('stage') }}
 )
 
 select * from orders

@@ -13,6 +13,7 @@ from airflow.providers.amazon.aws.transfers.s3_to_redshift import S3ToRedshiftOp
 from airflow.utils.task_group import TaskGroup
 from cosmos import DbtTaskGroup, ProjectConfig, ProfileConfig, ExecutionConfig
 from cosmos.profiles import RedshiftUserPasswordProfileMapping
+from airflow.operators.bash import BashOperator
 
 from include.functions.get_s3_key import get_s3_key
 from include.data_generator.fakeDataOperator import FakeDataToS3Operator
@@ -21,6 +22,7 @@ DAG_NAME = 'incremental_superstore_data_pipeline'
 
 DBT_EXECUTABLE_PATH = f"{os.environ['AIRFLOW_HOME']}/dbt_venv/bin/dbt"
 
+SODA_PATH = "~/include"
 TODAY_DATE = datetime.now().strftime('%Y-%m-%d')
 
 default_args = {
@@ -33,7 +35,7 @@ default_args = {
 }
 
 profile_config = ProfileConfig(
-    profile_name="dbt_initial_load",
+    profile_name="dbt_incremental_load",
     target_name="dev",
     profile_mapping=RedshiftUserPasswordProfileMapping(
         conn_id="redshift_default",
@@ -88,23 +90,22 @@ with DAG(
         provide_context=True
     )
 
-    with TaskGroup("create_staging", tooltip="task group #1") as create_schema_task_group:
-        create_stage_schema = RedshiftSQLOperator(
-            task_id='create_stage_schema',
-            sql='/sql/create_schema.sql',
-            params={
-                "schema": "stage",
-            },
-        )
+    create_stage_schema = RedshiftSQLOperator(
+        task_id='create_stage_schema',
+        sql='/sql/create_schema.sql',
+        params={
+            "schema": "stage",
+        },
+    )
 
-        create_staging_table = RedshiftSQLOperator(
-            task_id='create_staging_table',
-            sql='/sql/create_staging.sql',
-            params={
-                "schema": "stage",
-                "table": "staging"
-            },
-        )
+    create_staging_table = RedshiftSQLOperator(
+        task_id='create_staging_table',
+        sql='/sql/create_staging.sql',
+        params={
+            "schema": "stage",
+            "table": "staging"
+        },
+    )
 
     s3_to_redshift_stage = S3ToRedshiftOperator(
         task_id='s3_to_redshift_stage',
@@ -128,7 +129,7 @@ with DAG(
         profile_config=profile_config,
         execution_config=execution_config,
         operator_args={ 
-         "full_refresh": True
+         "full_refresh": False
         },
         default_args={"retries": 2},
     )
@@ -142,4 +143,17 @@ with DAG(
         },
     )
 
-    start_operator>>fake_data_to_s3>>sqs_sensor>>get_s3_key_task>>s3_to_redshift_stage>>transform_data>>delete_staging_table
+    # soda_test = BashOperator(
+    #     task_id="soda_test",
+    #     bash_command=f"soda test-connection -d superstore -c \
+    #         /usr/local/airflow/include/soda/config.yml -V"
+    # )
+
+    soda_test = BashOperator(
+        task_id="soda_test",
+        bash_command=f"soda scan -d superstore -c \
+            /usr/local/airflow/include/soda/config.yml /usr/local/airflow/include/soda/checks/"
+    )
+
+    start_operator>>fake_data_to_s3>>sqs_sensor>>get_s3_key_task>>create_stage_schema>>create_staging_table>>s3_to_redshift_stage>>transform_data>>delete_staging_table
+    delete_staging_table>>soda_test

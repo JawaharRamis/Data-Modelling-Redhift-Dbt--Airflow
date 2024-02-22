@@ -36,8 +36,6 @@ class FakeDataToS3Operator(BaseOperator):
         # Generate fake data
         fake_data_generator = FakeDataGenerator(existing_data)
         fake_data = fake_data_generator.generate_fake_data()
-        for row in fake_data[:3]:
-            print(row)
 
         df = pd.DataFrame(fake_data)
         csv_file = '/usr/local/airflow/include/data/fake_data.csv'
