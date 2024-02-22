@@ -1,17 +1,17 @@
 checks for orders:
   - row_count > 0
   - missing_count("Order ID") = 0:
-    name: no missing order ids
-  # - order_row_count = 0:
-  #     name: Primary key check
-  #     order_row_count query: |
-  #       SELECT COUNT(*) 
-  #       FROM (
-  #         SELECT "Order ID"
-  #         FROM orders
-  #         GROUP BY "Order ID"
-  #         HAVING COUNT(*) > 1
-  #       )
+      name: Order ID should not be null
+  - duplicate_row_count = 0:
+      name: Primary key check for orders
+      duplicate_row_count query: |
+        SELECT COUNT(*) 
+        FROM (
+          SELECT "Order ID"
+          FROM orders
+          GROUP BY "Order ID"
+          HAVING COUNT(*) > 1
+        )
   - invalid_shipping = 0:
       name: Shiping date on or after order date
       invalid_shipping query: |

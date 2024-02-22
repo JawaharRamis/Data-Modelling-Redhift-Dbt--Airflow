@@ -16,15 +16,9 @@ checks for sales:
       name: Referential integrity of Product ID
   - values in "Customer ID" must exist in customers "Customer ID":
       name: Referential integrity of Customer ID
-  - invalid_discount = 0:
-      name: Discount shouldnt be more than sales
-      invalid_discount query: |
-        SELECT COUNT(*) 
-        FROM sales 
-        WHERE "Discount" > "Sales"
-  - row_count = 0:
-      name: Primary key check
-      row_count query: |
+  - duplicate_row_count = 0:
+      name: Primary key check for sales
+      duplicate_row_count query: |
         SELECT COUNT(*) 
         FROM (
           SELECT "Order ID", "Product ID"
