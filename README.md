@@ -17,6 +17,10 @@ The project involves the following components and technologies:
 
 The data modeling follows a typical star schema approach, with facts and dimensions.
 
+## Architecture
+
+![Architecture](images/architecture.png)
+
 ## DAGs
 
 ### Initial Load DAG
