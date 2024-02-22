@@ -20,8 +20,8 @@ env:
   DEPLOYMENT_ID: ${{ inputs.deploymentId || vars.DEPLOYMENT_ID }}
 
 jobs:
-  environment: test
   build:
+    environment: test
     runs-on: ubuntu-latest
     steps:
     - name: Deploy to Astro
